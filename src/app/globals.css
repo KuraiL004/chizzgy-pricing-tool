@@ -1,0 +1,177 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+:root {
+  /* ==========================================================================
+     Chizzgy Tasarım Sistemi - Apple Off-Black & Glassmorphism
+     Tek kaynak: Rules.md (theme-config.ts)
+     Tasarım dili: Apple sadeliği, bol negatif boşluk, Off-Black (#161617),
+     Off-White (#F5F5F7), Glassmorphism (rgba(255, 255, 255, 0.03)) & border-glass.
+     ========================================================================== */
+
+  /* 1. Arka Plan & Cam Materyali */
+  --bg-main: #161617;
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-surface-hover: rgba(255, 255, 255, 0.06);
+  --glass-surface-active: rgba(255, 255, 255, 0.09);
+
+  /* 2. Metin Renkleri */
+  --text-primary: #F5F5F7;
+  --text-secondary: #86868B;
+  --text-muted: #515154;
+
+  /* 3. Aksiyon & Çerçeve */
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-active: rgba(255, 255, 255, 0.22);
+  --accent-primary: #F5F5F7;
+  --accent-primary-text: #161617;
+  --accent-whatsapp: #25D366;
+}
+
+@theme {
+  --color-bg-main: var(--bg-main);
+  --color-glass-surface: var(--glass-surface);
+  --color-glass-surface-hover: var(--glass-surface-hover);
+  --color-border-glass: var(--border-glass);
+  --color-border-glass-active: var(--border-glass-active);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-text: var(--accent-primary-text);
+  --color-accent-whatsapp: var(--accent-whatsapp);
+
+  /* Shorthand aliases */
+  --color-main: var(--bg-main);
+  --color-surface: var(--glass-surface);
+  --color-surface-hover: var(--glass-surface-hover);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+
+  /* Apple SF Pro / Inter Typography */
+  --text-h1: 3.5rem;
+  --text-h1--line-height: 1.1;
+  --text-h1--font-weight: 500;
+  --text-h1--letter-spacing: -0.03em;
+
+  --text-h2: 2rem;
+  --text-h2--line-height: 1.25;
+  --text-h2--font-weight: 500;
+  --text-h2--letter-spacing: -0.02em;
+
+  --text-h3: 1.375rem;
+  --text-h3--line-height: 1.35;
+  --text-h3--font-weight: 500;
+  --text-h3--letter-spacing: -0.01em;
+
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.5;
+  --text-body--font-weight: 400;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.4;
+  --text-small--font-weight: 400;
+
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+}
+
+/* Base Body Styles */
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-main);
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Apple Glassmorphism Helper */
+.glass-panel {
+  background-color: var(--glass-surface);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+}
+
+/* Apple-style Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  background: var(--border-glass-active);
+  border-radius: 9999px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  margin-top: -7.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-track {
+  height: 3px;
+  background: var(--border-glass-active);
+  border-radius: 9999px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: var(--text-primary);
+  cursor: pointer;
+}
+
+/* Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-glass);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-glass-active);
+}
+
+/* Print / PDF */
+@media print {
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
