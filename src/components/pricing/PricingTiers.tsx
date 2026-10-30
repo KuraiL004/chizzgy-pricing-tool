@@ -7,7 +7,9 @@ import { useGSAP } from "@gsap/react";
 import {
   PRESET_TIERS,
   PRICING_CONFIG,
-  SLIDERS,
+  SHOOTING_LABELS,
+  EDITING_LABELS,
+  POSTER_LABELS,
   PresetTier,
   calculatePricing,
 } from "@/config/pricing-config";
@@ -58,7 +60,13 @@ export function PricingTiers() {
           const preset = PRESET_TIERS[tier];
           const { grandTotal } = calculatePricing(preset.config);
           const isActive = activePreset === tier;
-          const items = SLIDERS.filter((s) => preset.config[s.key] > 0);
+          const { videoCount, shootingTier, editingTier, posterCount, posterTier } = preset.config;
+          const items: [string, string][] = [
+            [`${videoCount}`, "Video"],
+            [SHOOTING_LABELS[shootingTier], "Çekim"],
+            [EDITING_LABELS[editingTier], "Kurgu"],
+            [`${posterCount} ${POSTER_LABELS[posterTier]}`, "Poster"],
+          ];
 
           return (
             <div
@@ -83,11 +91,11 @@ export function PricingTiers() {
               </div>
 
               <ul className="space-y-3 mb-10 flex-1">
-                {items.map((s) => (
-                  <li key={s.key} className="flex items-center gap-3 text-body text-text-secondary">
+                {items.map(([value, label]) => (
+                  <li key={label} className="flex items-center gap-3 text-body text-text-secondary">
                     <Check className="w-4 h-4 text-text-primary shrink-0" />
                     <span>
-                      <span className="text-text-primary">{preset.config[s.key]}</span> {s.title}
+                      <span className="text-text-primary">{value}</span> {label}
                     </span>
                   </li>
                 ))}

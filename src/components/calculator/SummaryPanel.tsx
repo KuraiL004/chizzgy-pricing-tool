@@ -5,25 +5,45 @@ import { useCalculator } from "@/context/CalculatorContext";
 import {
   generateWhatsAppMessage,
   PRICING_CONFIG,
-  VIDEO_LABELS,
+  SHOOTING_LABELS,
+  EDITING_LABELS,
   POSTER_LABELS,
 } from "@/config/pricing-config";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { Send, Copy, Check, RotateCcw, ChevronUp, X, Printer } from "lucide-react";
 
 export function SummaryPanel() {
-  const { breakdown, resetDefaults } = useCalculator();
+  const { state, breakdown, resetDefaults } = useCalculator();
   const [copied, setCopied] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  const message = generateWhatsAppMessage(breakdown);
+  const message = generateWhatsAppMessage(state, breakdown);
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
   const isEmpty = breakdown.grandTotal === 0;
 
   // Yalnızca adedi sıfırdan büyük kalemler
   const lineItems = [
-    ...breakdown.videos.map((v) => ({ key: `video-${v.type}`, label: VIDEO_LABELS[v.type], count: v.count, price: v.price })),
-    ...breakdown.posters.map((p) => ({ key: `poster-${p.tier}`, label: POSTER_LABELS[p.tier], count: p.count, price: p.price })),
+    {
+      key: "shooting",
+      label: `Çekim · ${SHOOTING_LABELS[state.shootingTier]}`,
+      detail: `${state.videoCount} video · ${breakdown.shootingDays.toLocaleString("tr-TR")} gün`,
+      count: state.videoCount,
+      price: breakdown.shootingPrice,
+    },
+    {
+      key: "editing",
+      label: `Kurgu · ${EDITING_LABELS[state.editingTier]}`,
+      detail: `${state.videoCount} video`,
+      count: state.videoCount,
+      price: breakdown.editingPrice,
+    },
+    {
+      key: "posters",
+      label: `Poster · ${POSTER_LABELS[state.posterTier]}`,
+      detail: `${state.posterCount} adet`,
+      count: state.posterCount,
+      price: breakdown.posterPrice,
+    },
   ].filter((item) => item.count > 0);
 
   const handleCopy = async () => {
@@ -43,8 +63,9 @@ export function SummaryPanel() {
       ) : (
         lineItems.map((item) => (
           <div key={item.key} className="flex items-baseline justify-between gap-3 text-body">
-            <span className="text-text-secondary">
-              <span className="text-text-primary">{item.count}×</span> {item.label}
+            <span>
+              <span className="block text-text-primary">{item.label}</span>
+              <span className="block text-small text-text-secondary">{item.detail}</span>
             </span>
             <span className="text-text-primary tabular-nums shrink-0">
               <AnimatedNumber value={item.price} /> {breakdown.currency}
@@ -83,11 +104,6 @@ export function SummaryPanel() {
               </span>
               <span className="text-body text-text-secondary">{PRICING_CONFIG.currency}</span>
             </div>
-            {breakdown.totalShootingDays > 0 && (
-              <span className="block text-small text-text-secondary mt-3">
-                Tahmini çekim süresi: {breakdown.totalShootingDays.toLocaleString("tr-TR")} gün
-              </span>
-            )}
           </div>
 
           <div className="space-y-3">

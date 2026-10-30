@@ -4,7 +4,8 @@ import React, { createContext, useContext, useState, useMemo } from "react";
 import {
   CalculatorState,
   PricingBreakdown,
-  SliderKey,
+  CountKey,
+  TierKey,
   PresetTier,
   EMPTY_STATE,
   PRESET_TIERS,
@@ -15,7 +16,8 @@ interface CalculatorContextType {
   state: CalculatorState;
   breakdown: PricingBreakdown;
   activePreset: PresetTier | null;
-  setSlider: (key: SliderKey, value: number) => void;
+  setCount: (key: CountKey, value: number) => void;
+  setTier: <K extends TierKey>(key: K, value: CalculatorState[K]) => void;
   applyPreset: (tier: PresetTier) => void;
   resetDefaults: () => void;
 }
@@ -29,9 +31,14 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
   // Canlı maliyet dökümü
   const breakdown = useMemo(() => calculatePricing(state), [state]);
 
-  const setSlider = (key: SliderKey, value: number) => {
+  // Manuel ayar yapıldığında paket artık karma pakettir
+  const setCount = (key: CountKey, value: number) => {
     setState((prev) => ({ ...prev, [key]: Math.max(0, Math.round(value)) }));
-    // Manuel ayar yapıldığında paket artık karma pakettir
+    setActivePreset(null);
+  };
+
+  const setTier = <K extends TierKey>(key: K, value: CalculatorState[K]) => {
+    setState((prev) => ({ ...prev, [key]: value }));
     setActivePreset(null);
   };
 
@@ -49,7 +56,7 @@ export function CalculatorProvider({ children }: { children: React.ReactNode }) 
 
   return (
     <CalculatorContext.Provider
-      value={{ state, breakdown, activePreset, setSlider, applyPreset, resetDefaults }}
+      value={{ state, breakdown, activePreset, setCount, setTier, applyPreset, resetDefaults }}
     >
       {children}
     </CalculatorContext.Provider>
