@@ -26,15 +26,17 @@ export function AnimatedNumber({ value, className }: AnimatedNumberProps) {
       const ease = 1 - Math.pow(1 - progress, 4);
       const current = Math.round(startValue + (endValue - startValue) * ease);
       setDisplayValue(current);
+      // Hızlı slider hareketlerinde animasyon kaldığı yerden devam etsin
+      prevValueRef.current = current;
 
       if (progress < 1) {
-        requestAnimationFrame(update);
+        animId = requestAnimationFrame(update);
       } else {
         prevValueRef.current = endValue;
       }
     };
 
-    const animId = requestAnimationFrame(update);
+    let animId = requestAnimationFrame(update);
     return () => cancelAnimationFrame(animId);
   }, [value]);
 

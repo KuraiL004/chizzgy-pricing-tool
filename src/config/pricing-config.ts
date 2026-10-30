@@ -1,372 +1,221 @@
 /**
- * Chizzgy Price Calculator & Proposal Engine — Merkezi Fiyatlandırma Konfigürasyonu
- * PRD Dokümanı 6. Bölüm Birebir Referans Alınmıştır.
- * Para Birimi: AZN (Azerbaycan Manatı)
+ * Chizzgy Price Calculator — Merkezi Fiyatlandırma Motoru
+ * Tüm UI bu dosyaya referans verir. Para Birimi: AZN (Azerbaycan Manatı)
+ *
+ * Model: Müşteri Fiyatı = Ajans Maliyeti (Cost) × Kâr Marjı Çarpanı (profitMargin)
  */
 
 export const PRICING_CONFIG = {
   currency: "AZN",
   currencySymbol: "₼",
-  videos: {
-    baseShootingRate: { none: 0, standard: 45, pro4k: 80, cinematic: 140 }, // video başı çekim
-    baseEditingRate: { basic: 30, dynamic: 55, vfx3d: 110 },               // video başı kurgu
-  },
-  posters: {
-    rates: { typographic: 15, manipulation: 30, render3d: 55 },
-  },
-  motion: {
-    logoAnimation: 120,
-    motionPoster: 75,
-    explainerPer10Sec: 90,
-  },
-  branding: {
-    none: 0,
-    miniKit: 350,
-    fullBrandbook: 950,
-  },
-  addons: {
-    drone: 180,
-    copywritingPerVideo: 20,
-    voiceover: 100,
-    expressMultiplier: 1.25, // %25 ek ücret
-  },
-} as const;
 
-// Tip tanımları
-export type ShootingQuality = keyof typeof PRICING_CONFIG.videos.baseShootingRate;
-export type EditingQuality = keyof typeof PRICING_CONFIG.videos.baseEditingRate;
-export type PosterQuality = keyof typeof PRICING_CONFIG.posters.rates;
-export type BrandingOption = keyof typeof PRICING_CONFIG.branding;
+  // Ajansın kâr marjı çarpanı (1.5 = maliyetin %50 üstü)
+  profitMargin: 1.5,
 
-// UI & Açıklama Etiketleri
-export const PRICING_LABELS = {
   shooting: {
-    none: { title: "Yok (Sadece Kurgu)", description: "Ham görüntüleri müşteri sağlar." },
-    standard: { title: "Standart Çekim", description: "Mobil/Gimbal destekli hızlı dikey çekim." },
-    pro4k: { title: "Pro 4K Çekim", description: "Profesyonel sinema kamerası, aydınlatma seti, ses kayıt ekipmanı." },
-    cinematic: { title: "Cinematic Çekim", description: "Çift kamera, üst segment lensler, sanatsal ışık tasarımı ve prodüksiyon ekibi." },
+    // 1 tam çekim günü ortalama 3.5 video çıkarır → Gün = Video Sayısı / 3.5
+    videosPerDay: 3.5,
+    // Günlük çekim maliyetleri
+    dailyCost: { podcast: 125, standard: 230, premium: 500 },
   },
-  editing: {
-    basic: { title: "Temel Kurgu (Basic)", description: "Hızlı kesim, tempo montajı, standart dinamik altyazılar." },
-    dynamic: { title: "Dinamik Motion Edit", description: "B-roll entegrasyonu, sound design, hook animasyonları, color grading." },
-    vfx3d: { title: "Advanced VFX & 3D", description: "Ağır kompozisyon, 3D obje yerleşimi, özel efektler ve ritmik ses miksajı." },
-  },
-  posters: {
-    typographic: { title: "2D Minimalist / Tipografik", description: "Sosyal medya için sade bilgi ve tipografi şablonları." },
-    manipulation: { title: "Manipülasyon / Sanatsal", description: "Dekupe, kompozisyon, profesyonel retouch ve detaylı ışıklandırma." },
-    render3d: { title: "3D Render Destekli", description: "Ürünlerin veya objelerin 3D modelleme/render çıktıları." },
-  },
-  motion: {
-    logoAnimation: { title: "Hareketli Logo / İntro-Outro", description: "1-3 sn prestij logo animasyonu." },
-    motionPoster: { title: "Motion Poster (Animasyonlu Afiş)", description: "5-10 saniyelik hareketli postlar." },
-    explainerPer10Sec: { title: "Özel 2D/3D Tanıtım Animasyonu", description: "10 saniyelik birimler halinde animasyon üretimi." },
-  },
-  branding: {
-    none: { title: "Hizmet İstemiyorum", description: "Mevcut kurumsal kimlik ile devam edilir." },
-    miniKit: { title: "Logo & Renk Paleti (Mini Kit)", description: "Temel vektör logo, font ailesi, renk kodları." },
-    fullBrandbook: { title: "Full Brandbook (Kapsamlı)", description: "Logo varyasyonları, rehber, gridler, tipografi, evraklar, sosyal medya kiti." },
-  },
-  addons: {
-    drone: { title: "Drone Çekimi (FPV / Hava)", description: "Hava çekimleri ve dinamik geniş açılar." },
-    copywriting: { title: "Senaryo & İçerik Metin Yazarlığı", description: "Video başı profesyonel senaryo ve kurgu metni." },
-    voiceover: { title: "Profesyonel Seslendirme (Voiceover)", description: "Stüdyo ses kaydı ve ses miksajı." },
-    express: { title: "Express Teslimat (+%25)", description: "Proje süresini yarıya indirir." },
-  },
+
+  // Video başı kurgu maliyetleri
+  editing: { basic: 35, medium: 50, premium: 300 },
+
+  // Adet başı poster maliyetleri
+  posters: { standard: 20, premium: 100 },
 } as const;
 
-// Hesaplayıcı Durumu Arayüzü
+export type ShootingTier = keyof typeof PRICING_CONFIG.shooting.dailyCost;
+export type EditingTier = keyof typeof PRICING_CONFIG.editing;
+export type PosterTier = keyof typeof PRICING_CONFIG.posters;
+
+// Her video türü bir çekim seviyesi + bir kurgu seviyesinden oluşur
+export const VIDEO_TYPES = {
+  podcast: { shooting: "podcast", editing: "basic" },
+  standard: { shooting: "standard", editing: "medium" },
+  premium: { shooting: "premium", editing: "premium" },
+} as const satisfies Record<string, { shooting: ShootingTier; editing: EditingTier }>;
+
+export type VideoType = keyof typeof VIDEO_TYPES;
+
+// Hesaplayıcı durumu — her slider ayrı bir state alanıdır
 export interface CalculatorState {
-  videoCount: number;
-  shootingQuality: ShootingQuality;
-  editingQuality: EditingQuality;
-  posterCount: number;
-  posterQuality: PosterQuality;
-  motion: {
-    logoAnimation: number;       // Adet
-    motionPoster: number;        // Adet
-    explainer10SecUnits: number; // 10 sn'lik birimler
-  };
-  branding: BrandingOption;
-  addons: {
-    drone: boolean;
-    copywriting: boolean;
-    voiceover: boolean;
-    express: boolean;
-  };
+  podcastVideos: number;
+  standardVideos: number;
+  premiumVideos: number;
+  standardPosters: number;
+  premiumPosters: number;
 }
 
-// Kalem Bazlı Maliyet Çıktısı
-export interface PricingBreakdown {
-  currency: string;
-  videos: {
-    count: number;
-    shootingPerUnit: number;
-    editingPerUnit: number;
-    totalShooting: number;
-    totalEditing: number;
-    total: number;
-  };
-  posters: {
-    count: number;
-    ratePerUnit: number;
-    total: number;
-  };
-  motion: {
-    logoAnimationTotal: number;
-    motionPosterTotal: number;
-    explainerTotal: number;
-    total: number;
-  };
-  branding: {
-    type: BrandingOption;
-    total: number;
-  };
-  addons: {
-    droneTotal: number;
-    copywritingTotal: number;
-    voiceoverTotal: number;
-    subtotal: number;
-  };
-  subtotalBeforeExpress: number;
-  expressMultiplierApplied: boolean;
-  expressFee: number;
-  grandTotal: number;
-}
+export type SliderKey = keyof CalculatorState;
 
-// PRD 2.2 Sabit 3'lü Paket Tanımları
+// Slider tanımları (UI sırası, etiketler ve sınırlar)
+export const SLIDERS: readonly {
+  key: SliderKey;
+  title: string;
+  description: string;
+  max: number;
+}[] = [
+  { key: "podcastVideos", title: "Podcast / Tripod Video", description: "Sabit kamera çekimi + Basic kurgu (Cut & Altyazı)", max: 30 },
+  { key: "standardVideos", title: "Standart Video", description: "Standart çekim + Orta kurgu (Hafif Motion)", max: 30 },
+  { key: "premiumVideos", title: "Premium Video", description: "Premium çekim + İleri kurgu", max: 30 },
+  { key: "standardPosters", title: "Standart Poster", description: "Sosyal medya için sade tasarım", max: 30 },
+  { key: "premiumPosters", title: "Premium Poster", description: "Manipülasyon, retouch ve detaylı kompozisyon", max: 30 },
+];
+
+export const EMPTY_STATE: CalculatorState = {
+  podcastVideos: 0,
+  standardVideos: 0,
+  premiumVideos: 0,
+  standardPosters: 0,
+  premiumPosters: 0,
+};
+
+// Hazır paketler — applyPreset bu değerleri slider'lara doldurur
 export const PRESET_TIERS = {
   starter: {
     id: "starter",
     name: "Starter",
-    badge: "Temel Sosyal Medya",
     description: "Sosyal medyada düzenli ve profesyonel varlık göstermek isteyen markalar için.",
-    fixedPrice: 660,
-    config: {
-      videoCount: 8,
-      shootingQuality: "standard" as ShootingQuality,
-      editingQuality: "basic" as EditingQuality,
-      posterCount: 4,
-      posterQuality: "typographic" as PosterQuality,
-      motion: {
-        logoAnimation: 0,
-        motionPoster: 0,
-        explainer10SecUnits: 0,
-      },
-      branding: "none" as BrandingOption,
-      addons: {
-        drone: false,
-        copywriting: false,
-        voiceover: false,
-        express: false,
-      },
-    },
+    config: { podcastVideos: 4, standardVideos: 4, premiumVideos: 0, standardPosters: 4, premiumPosters: 0 },
   },
   growth: {
     id: "growth",
     name: "Growth",
-    badge: "En Popüler",
+    description: "Hızlı büyümek ve dinamik kurgularla etkileşimi artırmak isteyenler için.",
     popular: true,
-    description: "Hızlı büyümek, etkileşim rekorları kırmak ve dinamik kurgular isteyenler için.",
-    fixedPrice: 2445,
-    config: {
-      videoCount: 15,
-      shootingQuality: "pro4k" as ShootingQuality,
-      editingQuality: "dynamic" as EditingQuality,
-      posterCount: 10,
-      posterQuality: "manipulation" as PosterQuality,
-      motion: {
-        logoAnimation: 1,
-        motionPoster: 0,
-        explainer10SecUnits: 0,
-      },
-      branding: "none" as BrandingOption,
-      addons: {
-        drone: false,
-        copywriting: false,
-        voiceover: false,
-        express: false,
-      },
-    },
+    config: { podcastVideos: 2, standardVideos: 8, premiumVideos: 2, standardPosters: 6, premiumPosters: 2 },
   },
   elite: {
     id: "elite",
-    name: "Elite / Brand Transformation",
-    badge: "Full Prodüksiyon",
-    description: "Sektör liderliği, üst düzey marka algısı ve 360 derece sinematik dönüşüm paketi.",
-    fixedPrice: 9381.25,
-    config: {
-      videoCount: 20,
-      shootingQuality: "cinematic" as ShootingQuality,
-      editingQuality: "vfx3d" as EditingQuality,
-      posterCount: 15,
-      posterQuality: "render3d" as PosterQuality,
-      motion: {
-        logoAnimation: 1,
-        motionPoster: 2,
-        explainer10SecUnits: 0,
-      },
-      branding: "fullBrandbook" as BrandingOption,
-      addons: {
-        drone: true,
-        copywriting: true,
-        voiceover: true,
-        express: true,
-      },
-    },
+    name: "Elite",
+    description: "Üst düzey marka algısı ve sinematik prodüksiyon isteyen markalar için.",
+    config: { podcastVideos: 0, standardVideos: 8, premiumVideos: 6, standardPosters: 6, premiumPosters: 6 },
   },
-} as const;
+} as const satisfies Record<string, { id: string; name: string; description: string; popular?: boolean; config: CalculatorState }>;
+
+export type PresetTier = keyof typeof PRESET_TIERS;
+
+export interface VideoLine {
+  type: VideoType;
+  count: number;
+  shootingDays: number;
+  shootingCost: number;
+  editingCost: number;
+  cost: number;
+  price: number;
+}
+
+export interface PosterLine {
+  tier: PosterTier;
+  count: number;
+  cost: number;
+  price: number;
+}
+
+export interface PricingBreakdown {
+  currency: string;
+  videos: VideoLine[];
+  posters: PosterLine[];
+  totalVideos: number;
+  totalPosters: number;
+  totalShootingDays: number;
+  totalCost: number;
+  grandTotal: number;
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+const VIDEO_COUNT_KEY: Record<VideoType, SliderKey> = {
+  podcast: "podcastVideos",
+  standard: "standardVideos",
+  premium: "premiumVideos",
+};
+
+const POSTER_COUNT_KEY: Record<PosterTier, SliderKey> = {
+  standard: "standardPosters",
+  premium: "premiumPosters",
+};
 
 /**
- * Dinamik hesaplama formülü (PRD 3 & 4)
+ * Hesaplama motoru: maliyetleri kalem kalem çıkarır, kâr marjını uygular.
  */
-export function calculatePricing(state: CalculatorState): PricingBreakdown {
+export function calculatePricing(
+  state: CalculatorState,
+  profitMargin: number = PRICING_CONFIG.profitMargin
+): PricingBreakdown {
   const cfg = PRICING_CONFIG;
 
-  // Video
-  const shootingRate = cfg.videos.baseShootingRate[state.shootingQuality] ?? 0;
-  const editingRate = cfg.videos.baseEditingRate[state.editingQuality] ?? 0;
-  const totalShooting = state.videoCount * shootingRate;
-  const totalEditing = state.videoCount * editingRate;
-  const totalVideos = totalShooting + totalEditing;
+  const videos: VideoLine[] = (Object.keys(VIDEO_TYPES) as VideoType[]).map((type) => {
+    const { shooting, editing } = VIDEO_TYPES[type];
+    const count = state[VIDEO_COUNT_KEY[type]];
+    const shootingDays = count / cfg.shooting.videosPerDay;
+    const shootingCost = shootingDays * cfg.shooting.dailyCost[shooting];
+    const editingCost = count * cfg.editing[editing];
+    const cost = shootingCost + editingCost;
+    return {
+      type,
+      count,
+      shootingDays: round2(shootingDays),
+      shootingCost: round2(shootingCost),
+      editingCost,
+      cost: round2(cost),
+      price: Math.round(cost * profitMargin),
+    };
+  });
 
-  // Poster
-  const posterRate = cfg.posters.rates[state.posterQuality] ?? 0;
-  const totalPosters = state.posterCount * posterRate;
+  const posters: PosterLine[] = (Object.keys(cfg.posters) as PosterTier[]).map((tier) => {
+    const count = state[POSTER_COUNT_KEY[tier]];
+    const cost = count * cfg.posters[tier];
+    return { tier, count, cost, price: Math.round(cost * profitMargin) };
+  });
 
-  // Motion
-  const logoTotal = (state.motion?.logoAnimation ?? 0) * cfg.motion.logoAnimation;
-  const motionPosterTotal = (state.motion?.motionPoster ?? 0) * cfg.motion.motionPoster;
-  const explainerTotal = (state.motion?.explainer10SecUnits ?? 0) * cfg.motion.explainerPer10Sec;
-  const totalMotion = logoTotal + motionPosterTotal + explainerTotal;
-
-  // Branding
-  const totalBranding = cfg.branding[state.branding] ?? 0;
-
-  // Ek Hizmetler (Addons)
-  const droneTotal = state.addons.drone ? cfg.addons.drone : 0;
-  const copywritingTotal = state.addons.copywriting ? state.videoCount * cfg.addons.copywritingPerVideo : 0;
-  const voiceoverTotal = state.addons.voiceover ? cfg.addons.voiceover : 0;
-  const addonsSubtotal = droneTotal + copywritingTotal + voiceoverTotal;
-
-  // Express öncesi ara toplam
-  const subtotalBeforeExpress = totalVideos + totalPosters + totalMotion + totalBranding + addonsSubtotal;
-
-  // Express Teslimat Katsayısı (%25 ek)
-  const expressMultiplierApplied = Boolean(state.addons.express);
-  const expressFee = expressMultiplierApplied
-    ? subtotalBeforeExpress * (cfg.addons.expressMultiplier - 1)
-    : 0;
-  const grandTotal = subtotalBeforeExpress + expressFee;
+  const lines = [...videos, ...posters];
+  const totalCost = lines.reduce((sum, l) => sum + l.cost, 0);
 
   return {
     currency: cfg.currency,
-    videos: {
-      count: state.videoCount,
-      shootingPerUnit: shootingRate,
-      editingPerUnit: editingRate,
-      totalShooting,
-      totalEditing,
-      total: totalVideos,
-    },
-    posters: {
-      count: state.posterCount,
-      ratePerUnit: posterRate,
-      total: totalPosters,
-    },
-    motion: {
-      logoAnimationTotal: logoTotal,
-      motionPosterTotal,
-      explainerTotal,
-      total: totalMotion,
-    },
-    branding: {
-      type: state.branding,
-      total: totalBranding,
-    },
-    addons: {
-      droneTotal,
-      copywritingTotal,
-      voiceoverTotal,
-      subtotal: addonsSubtotal,
-    },
-    subtotalBeforeExpress,
-    expressMultiplierApplied,
-    expressFee: Math.round(expressFee * 100) / 100,
-    grandTotal: Math.round(grandTotal * 100) / 100,
+    videos,
+    posters,
+    totalVideos: videos.reduce((sum, v) => sum + v.count, 0),
+    totalPosters: posters.reduce((sum, p) => sum + p.count, 0),
+    totalShootingDays: round2(videos.reduce((sum, v) => sum + v.shootingDays, 0)),
+    totalCost: round2(totalCost),
+    grandTotal: lines.reduce((sum, l) => sum + l.price, 0),
   };
 }
 
+export const VIDEO_LABELS: Record<VideoType, string> = {
+  podcast: "Podcast / Tripod Video",
+  standard: "Standart Video",
+  premium: "Premium Video",
+};
+
+export const POSTER_LABELS: Record<PosterTier, string> = {
+  standard: "Standart Poster",
+  premium: "Premium Poster",
+};
+
 /**
- * WhatsApp Teklif Metni Oluşturucu (PRD 4. CTA)
+ * WhatsApp Teklif Metni Oluşturucu
  */
-export function generateWhatsAppMessage(state: CalculatorState, breakdown: PricingBreakdown): string {
-  const shootingLabel = PRICING_LABELS.shooting[state.shootingQuality]?.title || state.shootingQuality;
-  const editingLabel = PRICING_LABELS.editing[state.editingQuality]?.title || state.editingQuality;
-  const posterLabel = PRICING_LABELS.posters[state.posterQuality]?.title || state.posterQuality;
-  const brandingLabel = PRICING_LABELS.branding[state.branding]?.title || state.branding;
+export function generateWhatsAppMessage(breakdown: PricingBreakdown): string {
+  const lines: string[] = [`*Chizzgy Fiyat Teklifi Talebi*`, `----------------------------------------`];
 
-  const lines: string[] = [
-    `*Chizzgy Fiyat Teklifi Talebi* ⚡`,
-    `----------------------------------------`,
-    `📹 *Video Prodüksiyonu:*`,
-    `• Adet: ${state.videoCount} video`,
-    `• Çekim Seviyesi: ${shootingLabel}`,
-    `• Kurgu Seviyesi: ${editingLabel}`,
-    `• Tutar: ${breakdown.videos.total} ${breakdown.currency}`,
-    ``,
-    `🎨 *Grafik & Poster:*`,
-    `• Adet: ${state.posterCount} poster`,
-    `• Kalite: ${posterLabel}`,
-    `• Tutar: ${breakdown.posters.total} ${breakdown.currency}`,
-  ];
-
-  if (breakdown.motion.total > 0) {
-    lines.push(
-      ``,
-      `✨ *Motion Design:*`,
-      state.motion.logoAnimation > 0 ? `• Hareketli Logo: ${state.motion.logoAnimation} adet` : "",
-      state.motion.motionPoster > 0 ? `• Motion Poster: ${state.motion.motionPoster} adet` : "",
-      state.motion.explainer10SecUnits > 0 ? `• Tanıtım Animasyonu: ${state.motion.explainer10SecUnits * 10} sn` : "",
-      `• Tutar: ${breakdown.motion.total} ${breakdown.currency}`
-    );
+  for (const v of breakdown.videos) {
+    if (v.count > 0) lines.push(`• ${VIDEO_LABELS[v.type]}: ${v.count} adet — ${v.price} ${breakdown.currency}`);
   }
-
-  if (state.branding !== "none") {
-    lines.push(
-      ``,
-      `📐 *Markalama & Brandbook:*`,
-      `• Seçim: ${brandingLabel}`,
-      `• Tutar: ${breakdown.branding.total} ${breakdown.currency}`
-    );
-  }
-
-  const selectedAddons: string[] = [];
-  if (state.addons.drone) selectedAddons.push("Drone Çekimi (FPV/Hava)");
-  if (state.addons.copywriting) selectedAddons.push(`Senaryo & Metin Yazarlığı (${state.videoCount} video)`);
-  if (state.addons.voiceover) selectedAddons.push("Profesyonel Seslendirme");
-
-  if (selectedAddons.length > 0) {
-    lines.push(
-      ``,
-      `➕ *Ek Hizmetler:*`,
-      ...selectedAddons.map((addon) => `• ${addon}`),
-      `• Ek Hizmetler Tutarı: ${breakdown.addons.subtotal} ${breakdown.currency}`
-    );
-  }
-
-  if (state.addons.express) {
-    lines.push(
-      ``,
-      `⚡ *Express Teslimat:* Aktif (+%25 öncelik katsayısı - ${breakdown.expressFee} ${breakdown.currency})`
-    );
+  for (const p of breakdown.posters) {
+    if (p.count > 0) lines.push(`• ${POSTER_LABELS[p.tier]}: ${p.count} adet — ${p.price} ${breakdown.currency}`);
   }
 
   lines.push(
     `----------------------------------------`,
-    `💰 *TOPLAM BÜTÇE:* *${breakdown.grandTotal} ${breakdown.currency}*`,
-    `----------------------------------------`,
+    `*TOPLAM BÜTÇE:* *${breakdown.grandTotal} ${breakdown.currency}*`,
+    ``,
     `Detayları görüşmek ve prodüksiyona başlamak için bu teklif üzerinden devam etmek istiyorum.`
   );
 
-  return lines.filter(Boolean).join("\n");
+  return lines.join("\n");
 }
