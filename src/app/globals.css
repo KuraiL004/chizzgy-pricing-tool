@@ -1,177 +1,217 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
-:root {
-  /* ==========================================================================
-     Chizzgy Tasarım Sistemi - Apple Off-Black & Glassmorphism
-     Tek kaynak: Rules.md (theme-config.ts)
-     Tasarım dili: Apple sadeliği, bol negatif boşluk, Off-Black (#161617),
-     Off-White (#F5F5F7), Glassmorphism (rgba(255, 255, 255, 0.03)) & border-glass.
-     ========================================================================== */
-
-  /* 1. Arka Plan & Cam Materyali */
-  --bg-main: #161617;
-  --glass-surface: rgba(255, 255, 255, 0.03);
-  --glass-surface-hover: rgba(255, 255, 255, 0.06);
-  --glass-surface-active: rgba(255, 255, 255, 0.09);
-
-  /* 2. Metin Renkleri */
-  --text-primary: #F5F5F7;
-  --text-secondary: #86868B;
-  --text-muted: #515154;
-
-  /* 3. Aksiyon & Çerçeve */
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --border-glass-active: rgba(255, 255, 255, 0.22);
-  --accent-primary: #F5F5F7;
-  --accent-primary-text: #161617;
-  --accent-whatsapp: #25D366;
-}
+/* ==========================================================================
+   Chizzgy Dizayn Sistemi — iOS HIG (Dark) + Qara/Ağ brend
+   Səthlər: şüşə kartlar, yuxarıdan düşən ağ işıq, yumşaq parıltı.
+   ========================================================================== */
 
 @theme {
-  --color-bg-main: var(--bg-main);
-  --color-glass-surface: var(--glass-surface);
-  --color-glass-surface-hover: var(--glass-surface-hover);
-  --color-border-glass: var(--border-glass);
-  --color-border-glass-active: var(--border-glass-active);
+  /* Fon qatları (systemBackground → secondary → tertiary) */
+  --color-canvas: #000000;
+  --color-card: #1c1c1e;
+  --color-elevated: #2c2c2e;
 
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
+  /* Mətn (label → secondaryLabel → tertiaryLabel) */
+  --color-label: #ffffff;
+  --color-label-2: rgba(235, 235, 245, 0.6);
+  --color-label-3: rgba(235, 235, 245, 0.3);
 
-  --color-accent-primary: var(--accent-primary);
-  --color-accent-primary-text: var(--accent-primary-text);
-  --color-accent-whatsapp: var(--accent-whatsapp);
+  /* Ayırıcı xətt (separator) */
+  --color-separator: rgba(84, 84, 88, 0.6);
 
-  /* Shorthand aliases */
-  --color-main: var(--bg-main);
-  --color-surface: var(--glass-surface);
-  --color-surface-hover: var(--glass-surface-hover);
-  --color-primary: var(--text-primary);
-  --color-secondary: var(--text-secondary);
-  --color-muted: var(--text-muted);
-
-  /* Apple SF Pro / Inter Typography */
-  --text-h1: 3.5rem;
-  --text-h1--line-height: 1.1;
-  --text-h1--font-weight: 500;
-  --text-h1--letter-spacing: -0.03em;
-
-  --text-h2: 2rem;
-  --text-h2--line-height: 1.25;
-  --text-h2--font-weight: 500;
-  --text-h2--letter-spacing: -0.02em;
-
-  --text-h3: 1.375rem;
-  --text-h3--line-height: 1.35;
-  --text-h3--font-weight: 500;
-  --text-h3--letter-spacing: -0.01em;
-
-  --text-body: 1.0625rem;
-  --text-body--line-height: 1.5;
-  --text-body--font-weight: 400;
-
-  --text-small: 0.875rem;
-  --text-small--line-height: 1.4;
-  --text-small--font-weight: 400;
-
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+  /* iOS tipoqrafiyası: SF Pro (Apple cihazlarında), digərlərində Inter */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), "Inter", sans-serif;
 }
 
-/* Base Body Styles */
 html {
   scroll-behavior: smooth;
-  background-color: var(--bg-main);
+  background-color: #000000;
   color-scheme: dark;
 }
 
 body {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
+  background-color: #000000;
+  color: #ffffff;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Apple Glassmorphism Helper */
-.glass-panel {
-  background-color: var(--glass-surface);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid var(--border-glass);
-  border-radius: 24px;
+/* Üfüqi karusellərdə scrollbar gizlədilir (iOS kimi) */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-/* Apple-style Range Slider */
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
+/* Şüşə kart: nazik işıqlı kənar, yuxarıdan zəif parıltı */
+.surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 3px;
-  background: var(--border-glass-active);
+
+/* Kartın altından qalxan ağ işıq (seçilmiş elementlər üçün) */
+.surface-glow {
+  position: relative;
+  isolation: isolate;
+}
+.surface-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(80% 60% at 50% 110%, rgba(255, 255, 255, 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+/* Bölmə başlığındakı kiçik nişan */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
   border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(235, 235, 245, 0.75);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--text-primary);
-  margin-top: -7.5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  transition: transform 0.1s ease;
+
+/* Başlıqlarda yuxarıdan aşağı sönən ağ mətn */
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 30%, rgba(255, 255, 255, 0.55));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
+
+/* Hero: yuxarıdan düşən işıq və ulduz tozu */
+.hero-glow {
+  background:
+    radial-gradient(55% 45% at 50% 0%, rgba(255, 255, 255, 0.16), transparent 70%),
+    radial-gradient(35% 30% at 50% 0%, rgba(255, 255, 255, 0.12), transparent 70%);
 }
-input[type="range"]::-moz-range-track {
-  height: 3px;
-  background: var(--border-glass-active);
+.stars {
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
+    radial-gradient(1px 1px at 78% 14%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 48%, rgba(255, 255, 255, 0.35) 50%, transparent 51%),
+    radial-gradient(1px 1px at 24% 64%, rgba(255, 255, 255, 0.3) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 62% 36%, rgba(255, 255, 255, 0.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 8%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 82%, rgba(255, 255, 255, 0.3) 50%, transparent 51%),
+    radial-gradient(1px 1px at 94% 78%, rgba(255, 255, 255, 0.3) 50%, transparent 51%);
+}
+
+/* --------------------------------------------------------------------------
+   Səhifə fonu (Backdrop)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Kürələrin rəngi — qara-ağ brend üçün mirvari ağ */
+  --orb-core: rgba(245, 240, 232, 0.26);
+  --orb-mid: rgba(160, 156, 150, 0.11);
+}
+
+.orb {
+  position: absolute;
   border-radius: 9999px;
+  background: radial-gradient(closest-side, var(--orb-core), var(--orb-mid) 45%, transparent 100%);
 }
-input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border: none;
-  border-radius: 50%;
-  background: var(--text-primary);
-  cursor: pointer;
+.orb-strong {
+  --orb-core: rgba(250, 246, 240, 0.4);
+  --orb-mid: rgba(170, 164, 156, 0.15);
 }
 
-/* Minimalist Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-main);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-glass);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-glass-active);
-}
-
-/* Print / PDF */
-@media print {
-  header,
-  footer,
-  button,
-  .no-print {
-    display: none !important;
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
   }
+  to {
+    transform: translate3d(6%, 4%, 0) scale(1.08);
+  }
+}
+.orb-drift {
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.orb-drift-slow {
+  animation: drift 26s ease-in-out infinite alternate-reverse;
+}
 
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
+/* Şaquli "reeded glass" zolaqları — aşağıya doğru sönür */
+.fluted {
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0px,
+    rgba(255, 255, 255, 0.035) 18px,
+    rgba(0, 0, 0, 0.22) 34px,
+    rgba(255, 255, 255, 0) 36px
+  );
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
+}
+
+/* Kino dənəsi — SVG səs-küy toxuması */
+.grain {
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hero başlığı: sözlər bulanıqlıqdan aydınlaşır */
+@keyframes blurIn {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+.blur-in {
+  animation: blurIn 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Brend lenti: sonsuz sürüşmə */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee {
+  animation: marquee 40s linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* Segmented control dəyişəndə məzmun yumşaq görünür */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .blur-in,
+  .marquee,
+  .orb-drift,
+  .orb-drift-slow {
+    animation: none;
   }
 }
